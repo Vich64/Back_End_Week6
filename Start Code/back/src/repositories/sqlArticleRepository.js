@@ -10,35 +10,39 @@ export async function getAllArticles() {
 // Get one article by ID
 export async function getArticleById(id) {
     // TODO
-    const query = "SELECT * FROM articles WHERE id = ?"; 
+    const query = "SELECT * FROM article WHERE id = ?"; 
     const [rows] = await pool.query(query, [id]);
     return rows[0];
 }
 
 // Create a new article
 export async function createArticle(article) {
-    // TODO
-    const query = "INSERT INTO article (title, content, journalist ) VALUES (?, ?, ?)";
-    const { title, content, journalist } = article;
-    const [result] = await pool.query(query, [title, content, journalist]);
+    const query = `
+        INSERT INTO article (title, content, journalistId, category)
+        VALUES (?, ?, ?, ?)
+    `;
+    const { title, content, journalist, category } = article;
+    const [result] = await pool.query(query, [title, content, journalist, category]);
     return { id: result.insertId, ...article };
 }
 
 // Update an article by ID
-export async function updateArticle(id, updatedData) {
-    // TODO
-    const query = "UPDATE article SET title = ?, content = ?, journalist = ? WHERE id = ?";
-    const { title, content, journalist } = updatedData;
-    await pool.query(query, [title, content, journalist, id]);
-    return { id, ...updatedData };
+export async function updateArticle(id, updatedArticle) {
+    const query = `
+        UPDATE article
+        SET title = ?, content = ?, journalistId = ?, category = ?
+        WHERE id = ?
+    `;
+    const { title, content, journalist, category } = updatedArticle;
+    const [result] = await pool.query(query, [title, content, journalist, category, id]);
+    return result.affectedRows > 0; // returns true if update was successful
 }
 
 // Delete an article by ID
 export async function deleteArticle(id) {
-    // TODO
-    const query = "DELETE FROM article WHERE id = ?";
-    await pool.query(query, [id]); 
-    return { id };
+    const query = `DELETE FROM article WHERE id = ?`;
+    const [result] = await pool.query(query, [id]);
+    return result.affectedRows > 0; // returns true if delete was successful
 }
 
 export { getAllArticles as getArticles };
